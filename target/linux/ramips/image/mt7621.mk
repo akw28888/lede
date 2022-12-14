@@ -9,6 +9,19 @@ DEFAULT_SOC := mt7621
 KERNEL_DTB += -d21
 DEVICE_VARS += ELECOM_HWNAME LINKSYS_HWNAME
 
+define Build/arcadyan-trx
+	echo -ne "hsqs" > $@.hsqs
+	$(eval trx_magic=$(word 1,$(1)))
+	$(STAGING_DIR_HOST)/bin/otrx create $@.trx -M $(trx_magic) -f $@ \
+		-a 0x20000 -b 0x420000 -f $@.hsqs -a 1000
+	mv $@.trx $@
+	dd if=/dev/zero bs=1024 count=1 >> $@.tail
+	echo -ne "HDR0" | dd of=$@.tail bs=1 seek=$$((0x10c)) count=4 \
+		conv=notrunc 2>/dev/null
+	dd if=$@.tail >> $@ 2>/dev/null
+	rm $@.hsqs $@.tail
+endef
+
 define Build/elecom-wrc-gs-factory
 	$(eval product=$(word 1,$(1)))
 	$(eval version=$(word 2,$(1)))
