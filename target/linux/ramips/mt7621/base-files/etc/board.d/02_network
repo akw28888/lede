@@ -125,6 +125,13 @@ ramips_setup_macs()
 	local label_mac=""
 
 	case $board in
+	arcadyan,wg630223)
+		label_mac=$(mtd_get_mac_encrypted_arcadyan "board_data" "42583038694070636D5964652324252A")
+		lan_mac=$label_mac
+		wan_mac=$(macaddr_add "$lan_mac" 3)
+		ucidef_add_switch "switch0" \
+			"0:lan" "1:lan" "2:lan" "3:lan""4:wan" "6u@eth0" "5u@eth1"
+		;;
 	ampedwireless,ally-00x19k)
 		lan_mac=$(mtd_get_mac_ascii hwconfig HW.LAN.MAC.Address)
 		label_mac=$lan_mac
